@@ -31,15 +31,38 @@ class NTest < Test::Unit::TestCase
     assert_equal 16, unit_size(n, account_size, dollars_per_point)
   end
 
-  def test_adjusts_unit_size_based_on_account_size
+  def test_account_size_too_small
     n = 0.0141
-    account_size = 100_000
+    account_size = 10_000
     dollars_per_point = 42_000
 
-    assert_equal 1, unit_size(n, account_size, dollars_per_point)
+    assert_equal 0, unit_size(n, account_size, dollars_per_point)
   end
 
-  def unit_size(n, account_size, dollars_per_point)
+  def test_calculates_true_range
+    high_12_4_02 = 0.7420
+    low_12_4_02 = 0.7140
+    close_12_3_02 = 0.7389
+
+    assert_equal 0.0280, true_range(high_12_4_02, low_12_4_02, close_12_3_02)
+  end
+
+  def test_true_range_when_high_minus_low_is_max
+    high = 0.5
+    low = 0.1
+    previous_close = 0.3
+
+    assert_equal high - low, true_range(high, low, previous_close)
+  end
+
+  def true_range current_high, current_low, previous_close
+# True Range(TR) = Max(H-L, H-PDC, PDC-L)
+    [current_high - current_low, 
+     current_high - previous_close,
+     previous_close - current_low].max.round(4)
+  end
+
+  def unit_size n, account_size, dollars_per_point
     (one_percent_of_account(account_size) / (n * dollars_per_point)).to_int
   end
 
