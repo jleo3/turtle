@@ -55,8 +55,34 @@ class NTest < Test::Unit::TestCase
     assert_equal high - low, true_range(high, low, previous_close)
   end
 
+  def test_true_range_when_high_minus_close_is_max
+    high = 0.5
+    low = 0.3
+    previous_close = 0.1
+
+    assert_equal high - previous_close, true_range(high, low, previous_close)
+  end
+
+  def test_true_range_when_close_minus_low_is_max
+    high = 0.5
+    low = 0.3
+    previous_close = 0.8
+
+    assert_equal previous_close - low, true_range(high, low, previous_close)
+  end
+
+  def test_calculates_n
+    previous_n = 0.0134
+    true_range = 0.0280
+
+    assert_equal 0.0141, n(previous_n, true_range)
+  end
+
+  def n previous_n, true_range
+    ((19 * previous_n + true_range) / 20).round(4)
+  end
+
   def true_range current_high, current_low, previous_close
-# True Range(TR) = Max(H-L, H-PDC, PDC-L)
     [current_high - current_low, 
      current_high - previous_close,
      previous_close - current_low].max.round(4)
